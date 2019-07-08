@@ -27,6 +27,11 @@ class SingleGameOverScene: SKScene {
         self.completedIn = childNode(withName:"completedIn") as? SKLabelNode
         self.boardView?.setup(board: board)
         if boardView!.board!.isCompleted() {
+            if let car = board[board.width-1,board.exitRow] {
+                if let carView = boardView!.viewForCar(car: car) {
+                    carView.isHidden = true
+                }
+            }
             status?.text = "Congratulations!"
             let hours = Int(seconds/3600)
             let minutes = String(format: "%02d",Int((seconds%3600)/60))

@@ -168,7 +168,15 @@ class SingleGameScene: SKScene, BoardObserver {
                 let cellY = Int((boardView!.position.y-position.y)/boardView!.cellSize!)
                 boardView?.board?.moveCar(car: car, x: cellX-selectedOffsetX, y: cellY-selectedOffsetY)
                 if boardView!.board!.isExitPosition(car: car) {
-                    gameDelegate?.gameCompleted(board: boardView!.board!, seconds: timeCounter)
+                    selectedCar = nil
+                    car.selected = false
+                    let carView = boardView?.viewForCar(car: car)
+                    carView?.run(SKAction.sequence([
+                        SKAction.move(by: CGVector(dx: boardView!.cellSize!*3, dy: 0.0), duration: 0.5),
+                        SKAction.run( {
+                            self.gameDelegate?.gameCompleted(board: self.boardView!.board!, seconds: self.timeCounter)
+                        })])
+                    )
                 }
             }
         }
