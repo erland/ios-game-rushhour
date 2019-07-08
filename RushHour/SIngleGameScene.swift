@@ -181,6 +181,6 @@ class SingleGameScene: SKScene, BoardObserver {
     }
     
     func carRemoved(_ car: Car) {
-        print("Success!")
+        // Do nothing
     }
 }
