@@ -75,6 +75,17 @@ class BoardView : SKSpriteNode, BoardObserver {
         opening.alpha = 0.001
         opening.blendMode = .replace
         border.addChild(opening)
+        
+        let arrow = SKShapeNode()
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: boardWidth/2+frameSize*2,y: -boardHeight/2+CGFloat(exitRow+1)*cellSize+cellSize/4))
+        path.addLine(to: CGPoint(x: boardWidth/2+frameSize*2, y: -boardHeight/2+CGFloat(exitRow+2)*cellSize-cellSize/4))
+        path.addLine(to: CGPoint(x: boardWidth/2+frameSize*2+cellSize/2, y: -boardHeight/2+CGFloat(exitRow+2)*cellSize-cellSize/2))
+        path.addLine(to: CGPoint(x: boardWidth/2+frameSize*2,y: -boardHeight/2+CGFloat(exitRow+1)*cellSize+cellSize/4))
+        arrow.path = path
+        arrow.fillColor = .white
+        arrow.strokeColor = .white
+        border.addChild(arrow)
         let view = SKView(frame: CGRect(x: 0, y: 0, width: boardWidth+frameSize, height: boardHeight+frameSize))
         return view.texture(from: border)
     }
