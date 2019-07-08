@@ -10,17 +10,13 @@ import SpriteKit
 
 class CarView : SKSpriteNode, CarObserver {
     let cellSize: CGFloat
-    let selectedTexture: SKTexture?
-    let mainTexture: SKTexture?
     let car : Car
     
     init(car: Car, cellSize: CGFloat) {
         self.cellSize = cellSize
         self.car = car
-        let color = CarView.colorForCharacter(car.color)
-        self.mainTexture = CarView.createCarTexture(length: car.length, cellSize: cellSize, borderColor: UIColor.red, fillColor: color, alpha: 1)
-        self.selectedTexture = CarView.createCarTexture(length: car.length, cellSize: cellSize, borderColor: UIColor.red, fillColor: color, alpha: 0.5)
-        super.init(texture: mainTexture, color: UIColor.black, size: CGSize(width: CGFloat(car.length)*cellSize, height: cellSize))
+        let texture = CarView.textureForCar(color: car.color, length: car.length)
+        super.init(texture: texture, color: UIColor.black, size: CGSize(width: CGFloat(car.length)*cellSize, height: cellSize))
         car.attachObserver(observer: self)
         anchorPoint = CGPoint(x: 0, y: 1)
         carUpdated(car: car)
@@ -30,44 +26,44 @@ class CarView : SKSpriteNode, CarObserver {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private class func colorForCharacter(_ color: Character) -> UIColor {
+    private class func textureForCar(color: Character, length: Int) -> SKTexture {
         switch(color) {
         case "A":
-            return .red
+            return SKTexture(imageNamed: "car\(length)red")
         case "B":
-            return UIColor.init(red: 214/255, green: 255/255, blue: 219/255, alpha: 1.0)
+            return SKTexture(imageNamed: "car\(length)lightgreen")
         case "C":
-            return .orange
+            return SKTexture(imageNamed: "car\(length)lightred")
         case "D":
-            return UIColor.init(red: 214/255, green: 236/255, blue: 255/255, alpha: 1.0)
+            return SKTexture(imageNamed: "car\(length)lightcyan")
         case "E":
-            return UIColor.init(red: 255/255, green: 214/255, blue: 250/255, alpha: 1.0)
+            return SKTexture(imageNamed: "car\(length)lightpurple")
         case "F":
-            return .purple
+            return SKTexture(imageNamed: "car\(length)darkpurple")
         case "G":
-            return .green
+            return SKTexture(imageNamed: "car\(length)darkgreen")
         case "H":
-            return .lightGray
+            return SKTexture(imageNamed: "car\(length)lightred")
         case "I":
-            return UIColor.init(red: 252/255, green: 240/255, blue: 192/255, alpha: 1.0)
+            return SKTexture(imageNamed: "car\(length)darkyellow")
         case "J":
-            return .yellow
+            return SKTexture(imageNamed: "car\(length)yellow")
         case "K":
-            return .brown
+            return SKTexture(imageNamed: "car\(length)darkblue")
         case "L":
-            return UIColor.init(red: 218/255, green: 252/255, blue: 43/255, alpha: 1.0)
+            return SKTexture(imageNamed: "car\(length)blue")
         case "M":
-            return .orange
+            return SKTexture(imageNamed: "car\(length)green")
         case "N":
-            return .purple
+            return SKTexture(imageNamed: "car\(length)cyan")
         case "O":
-            return .blue
+            return SKTexture(imageNamed: "car\(length)darkred")
         case "P":
-            return .green
+            return SKTexture(imageNamed: "car\(length)darkcyan")
         case "x":
-            return .white
+            return SKTexture(imageNamed: "blocked\(length)")
         default:
-            return .yellow
+            return SKTexture(imageNamed: "car\(length)yellow")
         }
     }
     private class func createCarTexture(length: Int, cellSize: CGFloat, borderColor: UIColor, fillColor: UIColor, alpha: CGFloat) -> SKTexture? {
@@ -99,9 +95,9 @@ class CarView : SKSpriteNode, CarObserver {
             self.zRotation = -CGFloat.pi/2
         }
         if car.selected {
-            texture = selectedTexture
+            alpha = 0.5
         }else {
-            texture = mainTexture
+            alpha = 1.0
         }
     }
     
