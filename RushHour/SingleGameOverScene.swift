@@ -15,9 +15,10 @@ class SingleGameOverScene: SKScene {
     var openedTime: TimeInterval?
     var status: SKLabelNode?
     var completedIn: SKLabelNode?
+    var movesText: SKLabelNode?
     var boardName: SKLabelNode?
     
-    func setup(delegate: GameDelegate, board: Board, seconds: Int) {
+    func setup(delegate: GameDelegate, board: Board, seconds: Int, moves: Int) {
         self.gameDelegate = delegate
         
         self.boardView = childNode(withName:"board") as? BoardView
@@ -25,6 +26,7 @@ class SingleGameOverScene: SKScene {
         self.boardName = childNode(withName:"boardName") as? SKLabelNode
         self.boardName?.text = board.name
         self.completedIn = childNode(withName:"completedIn") as? SKLabelNode
+        self.movesText = childNode(withName:"moves") as? SKLabelNode
         self.boardView?.setup(board: board)
         if boardView!.board!.isCompleted() {
             if let car = board[board.width-1,board.exitRow] {
@@ -41,9 +43,15 @@ class SingleGameOverScene: SKScene {
             }else {
                 completedIn?.text = "Completed in: \(hours):\(minutes):\(seconds)"
             }
+            if let maxMoves = boardView!.board?.moves {
+                movesText?.text = "Moves: \(moves)/\(maxMoves)"
+            }else {
+                movesText?.text = "Moves: \(moves)"
+            }
         }else {
             status?.text = "Not completed"
             completedIn?.text = ""
+            movesText?.text = ""
         }
         
     }

@@ -22,6 +22,7 @@ class Board {
     let debug = false
     let exitRow: Int
     var originalBoardString: String = ""
+    var moves : Int?
     
     init(name: String, board: Array2D<Car>) {
         self.name = name
@@ -38,7 +39,15 @@ class Board {
     convenience init(name: String, boardString: String) {
         self.init(name: name)
         originalBoardString = boardString
-        initializeFromString(boardString: boardString)
+        var parsedBoardString = boardString
+        var parts = boardString.split(separator: " ")
+        if parts.count>1 {
+            moves = Int(parts[0])
+            parsedBoardString = String(parts[1])
+        }else {
+            moves = nil
+        }
+        initializeFromString(boardString: parsedBoardString)
     }
     
     
@@ -52,6 +61,15 @@ class Board {
     func detachObserver(_ observer: BoardObserver) {
         if let index = (self.observers.firstIndex(where: { $0 === observer })) {
             self.observers.remove(at: index)
+        }
+    }
+    
+    func reset() {
+        var parts = originalBoardString.split(separator: " ")
+        if parts.count>1 {
+            initializeFromString(boardString: String(parts[1]))
+        }else {
+            initializeFromString(boardString: originalBoardString)
         }
     }
     

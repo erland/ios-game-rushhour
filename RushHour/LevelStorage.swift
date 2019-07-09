@@ -13,6 +13,7 @@ struct StoredLevel : Codable {
     let seconds : Int
     let original : String
     let current : String
+    let moves : Int
     let hints : Int
     
     enum CodingKeys: String, CodingKey {
@@ -20,13 +21,15 @@ struct StoredLevel : Codable {
         case seconds = "seconds"
         case original = "original"
         case current = "current"
+        case moves = "moves"
         case hints = "hints"
     }
     
-    init(name: String, seconds: Int, original: String, current: String?, hints: Int) {
+    init(name: String, seconds: Int, original: String, current: String?, moves: Int, hints: Int) {
         self.name = name
         self.seconds = seconds
         self.original = original
+        self.moves = moves
         if current != nil {
             self.current = current!
         }else {
@@ -40,6 +43,7 @@ struct StoredLevel : Codable {
         seconds = try values.decode(Int.self, forKey: .seconds)
         original = try values.decode(String.self, forKey: .original)
         current = try values.decode(String.self, forKey: .current)
+        moves = try values.decodeIfPresent(Int.self, forKey: .moves) ?? 0
         hints = try values.decodeIfPresent(Int.self, forKey: .hints) ?? 0
     }
     
@@ -47,13 +51,44 @@ struct StoredLevel : Codable {
 
 struct LevelRecord : Codable {
     let original : String
+    let current : String
     let seconds : Int
+    let moves : Int
+
+    enum CodingKeys: String, CodingKey {
+        case original = "original"
+        case current = "current"
+        case seconds = "seconds"
+        case moves = "moves"
+    }
+    init(original: String, seconds: Int, moves: Int) {
+        self.seconds = seconds
+        self.current = ""
+        self.original = original
+        self.moves = moves
+    }
+    init(original: String, current: String, seconds: Int, moves: Int) {
+        self.seconds = seconds
+        self.current = current
+        self.original = original
+        self.moves = moves
+    }
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        original = try values.decode(String.self, forKey: .original)
+        current = try values.decodeIfPresent(String.self, forKey: .current) ?? ""
+        seconds = try values.decode(Int.self, forKey: .seconds)
+        moves = try values.decodeIfPresent(Int.self, forKey: .moves) ?? 0
+    }
 }
 
 class LevelStorage {
 
     func initializeBoard(_ storedLevel: StoredLevel) -> Board {
         let board = Board(name: storedLevel.name, boardString: storedLevel.original)
+        if storedLevel.current.count>0 {
+            board.initializeFromString(boardString: storedLevel.current)
+        }
         return board
 
     }
@@ -65,8 +100,8 @@ class LevelStorage {
         return loadData(StoredLevel.self, forKey: "inProgress")
     }
     
-    func storeBoardInProgress(board: Board, seconds: Int, hints: Int) {
-        let storedLevel = serializeBoard(board: board, seconds: seconds, hints: hints)
+    func storeBoardInProgress(board: Board, seconds: Int, moves: Int, hints: Int) {
+        let storedLevel = serializeBoard(board: board, seconds: seconds, moves: moves, hints: hints)
         var boards = loadData(StoredLevel.self, forKey: "inProgress")
         for (i,b) in boards.enumerated() {
             if b.original == storedLevel.original {
@@ -96,10 +131,10 @@ class LevelStorage {
         }
     }
     
-    func storeCompletedBoard(board: Board, seconds: Int, hints: Int) {
-        let storedLevel = serializeBoard(board: board, seconds: seconds, hints: hints, onlyPermanent: true)
+    func storeCompletedBoard(board: Board, seconds: Int, moves: Int, hints: Int) {
+        let storedLevel = serializeBoard(board: board, seconds: seconds, moves: moves, hints: hints, onlyPermanent: true)
         if hints==0 {
-            registerRecord(boardNumbers: storedLevel.original, seconds: seconds)
+            registerRecord(boardNumbers: storedLevel.original, seconds: seconds, moves: moves)
         }
         var boards = loadData(StoredLevel.self, forKey: "completed")
         for (i,b) in boards.enumerated() {
@@ -116,16 +151,16 @@ class LevelStorage {
         removeBoardInProgress(storedLevel: storedLevel)
     }
     
-    func serializeBoard(board: Board, seconds: Int, hints: Int, onlyPermanent: Bool = false) -> StoredLevel {
+    func serializeBoard(board: Board, seconds: Int, moves: Int, hints: Int, onlyPermanent: Bool = false) -> StoredLevel {
         let original = board.originalBoardString
         let current = board.asString()
         if onlyPermanent {
-            return StoredLevel.init(name: board.name, seconds: seconds, original: original, current: "", hints: hints)
+            return StoredLevel.init(name: board.name, seconds: seconds, original: original, current: "", moves: moves, hints: hints)
         }else {
-            return StoredLevel.init(name: board.name, seconds: seconds, original: original, current: current, hints: hints)
+            return StoredLevel.init(name: board.name, seconds: seconds, original: original, current: current, moves: moves, hints: hints)
         }
     }
-    func registerRecord(boardNumbers: String, seconds: Int) {
+    func registerRecord(boardNumbers: String, seconds: Int, moves: Int) {
         
         var records = loadData(LevelRecord.self, forKey: "records")
         var shouldBeAdded = true
@@ -140,39 +175,45 @@ class LevelStorage {
             }
         }
         if shouldBeAdded {
-            records.append(LevelRecord.init(original: boardNumbers, seconds: seconds))
+            records.append(LevelRecord.init(original: boardNumbers, seconds: seconds, moves: moves))
         }
         storeData(records, forKey: "records")
     }
 
-    func getRecord(boardNumbers: String) -> Int? {
+    struct LevelState {
+        let current : String
+        let seconds : Int
+        let moves : Int
+    }
+    
+    func getRecord(boardNumbers: String) -> LevelState? {
         
         let records = loadData(LevelRecord.self, forKey: "records")
         for r in records {
             if r.original == boardNumbers {
-                return r.seconds
+                return LevelState(current: "", seconds: r.seconds, moves: r.moves)
             }
         }
         return nil
     }
 
-    func getRecord(board: Board) -> Int? {
-        let serializedBoard = serializeBoard(board: board, seconds: 0, hints: 0, onlyPermanent: true)
+    func getRecord(board: Board) -> LevelState? {
+        let serializedBoard = serializeBoard(board: board, seconds: 0, moves: 0, hints: 0, onlyPermanent: true)
         let records = loadData(LevelRecord.self, forKey: "records")
         for r in records {
             if r.original == serializedBoard.original {
-                return r.seconds
+                return LevelState(current: "", seconds: r.seconds, moves: r.moves)
             }
         }
         return nil
     }
 
-    func getInProgress(boardNumbers: String) -> Int? {
+    func getInProgress(boardNumbers: String) -> LevelState? {
         
         let started = loadData(LevelRecord.self, forKey: "inProgress")
         for b in started {
             if b.original == boardNumbers {
-                return b.seconds
+                return LevelState(current: b.current, seconds: b.seconds, moves: b.moves)
             }
         }
         return nil

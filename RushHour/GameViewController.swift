@@ -50,13 +50,13 @@ class GameViewController: UIViewController, GameDelegate {
         return true
     }
     
-    func gameCompleted(board: Board, seconds: Int) {
+    func gameCompleted(board: Board, seconds: Int, moves: Int) {
         var completed = false
         if board.isCompleted() {
-            LevelStorage().storeCompletedBoard(board: board, seconds: seconds, hints: 0)
+            LevelStorage().storeCompletedBoard(board: board, seconds: seconds, moves: moves, hints: 0)
             completed = true
         }else {
-            LevelStorage().storeBoardInProgress(board: board, seconds: seconds, hints: 0)
+            LevelStorage().storeBoardInProgress(board: board, seconds: seconds, moves: moves, hints: 0)
         }
         if !completed {
             finishedGame()
@@ -66,7 +66,7 @@ class GameViewController: UIViewController, GameDelegate {
                 if let scene = SKScene(fileNamed: "SingleGameOverScene") as? SingleGameOverScene {
                     // Set the scale mode to scale to fit the window
                     scene.scaleMode = .aspectFit
-                    scene.setup(delegate: self, board: board, seconds: seconds)
+                    scene.setup(delegate: self, board: board, seconds: seconds, moves: moves)
                     
                     // Present the scene
                     view.presentScene(scene)
@@ -131,11 +131,11 @@ class GameViewController: UIViewController, GameDelegate {
 
     }
     
-    func selectedLevel(board: Board, startTime: Int) {
+    func selectedLevel(board: Board, startTime: Int, moves: Int) {
         if let view = self.view as! SKView? {
             // Load the SKScene from 'GameScene.sks'
             if let scene = SKScene(fileNamed: "SingleGameScene") as? SingleGameScene {
-                scene.setup(delegate: self, board: board, startTime: startTime)
+                scene.setup(delegate: self, board: board, startTime: startTime, moves: moves)
                 // Set the scale mode to scale to fit the window
                 scene.scaleMode = .aspectFit
                 view.presentScene(scene)

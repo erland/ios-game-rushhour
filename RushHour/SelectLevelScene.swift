@@ -15,6 +15,7 @@ class SelectLevelScene: SKScene {
     var boardTexts : [SKLabelNode] = []
     var timeTexts : [SKLabelNode] = []
     var times : [Int] = []
+    var moves: [Int] = []
     var loadingText : SKLabelNode?
     var backButton : SKLabelNode?
     var nextButton : SKLabelNode?
@@ -54,6 +55,7 @@ class SelectLevelScene: SKScene {
                 timeTexts.append(timeText)
             }
             times.append(0)
+            moves.append(0)
         }
         fillContent(withOffset: 0)
     }
@@ -65,6 +67,7 @@ class SelectLevelScene: SKScene {
             boardTexts[i].isHidden = true
             timeTexts[i].isHidden = true
             times[i] = 0
+            moves[i] = 0
         }
         loadingText?.isHidden = false
 
@@ -77,7 +80,8 @@ class SelectLevelScene: SKScene {
                         let storedBoard = storedBoards[offset+i-1]
                         let record = storage.getRecord(boardNumbers: storedBoard.original)
                         if record != nil {
-                            self.times[i-1] = record!
+                            self.times[i-1] = record!.seconds
+                            self.moves[i-1] = record!.moves
                         }
                         DispatchQueue.main.async {
                             let board = storage.initializeBoard(storedBoard)
@@ -126,6 +130,7 @@ class SelectLevelScene: SKScene {
                             self.boardTexts[i-1].alpha = 0.3
                             self.boardTexts[i-1].isHidden = false
                             self.times[i-1] = storedBoard.seconds
+                            self.moves[i-1] = storedBoard.moves
                             if self.times[i-1] > 0 {
                                 self.timeTexts[i-1].text = "\(self.timeAsString(self.times[i-1]))..."
                                 self.timeTexts[i-1].isHidden = false
@@ -159,15 +164,20 @@ class SelectLevelScene: SKScene {
                         if boardNumbers != nil {
                             let inProgress = storage.getInProgress(boardNumbers: boardNumbers!)
                             if inProgress != nil {
-                                self.times[i-1] = inProgress!
+                                self.times[i-1] = inProgress!.seconds
+                                self.moves[i-1] = inProgress!.moves
                             }else {
                                 let record = storage.getRecord(boardNumbers: boardNumbers!)
                                 if record != nil {
-                                    self.times[i-1] = record!
+                                    self.times[i-1] = record!.seconds
+                                    self.moves[i-1] = record!.moves
                                 }
                             }
                             DispatchQueue.main.async {
                                 let board = Board.init(name: "\(self.difficultyAsString(difficulty)) \(i)", boardString: boardNumbers!)
+                                if inProgress != nil && inProgress!.current.count>0 {
+                                    board.initializeFromString(boardString: inProgress!.current)
+                                }
                                 self.boards[i-1].setup(board: board)
                                 self.boards[i-1].alpha = 0.3
                                 self.boards[i-1].isHidden = false
@@ -210,7 +220,7 @@ class SelectLevelScene: SKScene {
                         if boardNumbers != nil {
                             let record = storage.getRecord(boardNumbers: boardNumbers!)
                             if record != nil {
-                                self.times[i-1] = record!
+                                self.times[i-1] = record!.seconds
                             }
                             let difficulty = repository.calculateDifficulty(boardNumbers: boardNumbers!)
                             DispatchQueue.main.async {
@@ -294,9 +304,9 @@ class SelectLevelScene: SKScene {
                 if boards[i].contains(touchLocation) {
                     if boards[i].board != nil {
                         if timeTexts[i].text == nil || !timeTexts[i].text!.hasSuffix("...") {
-                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: 0)
+                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: 0, moves: 0)
                         }else {
-                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: times[i])
+                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: times[i], moves: moves[i])
                         }
                         break
                     }

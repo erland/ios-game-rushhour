@@ -27,7 +27,7 @@ class SingleGameScene: SKScene, BoardObserver {
     var lastTouchX : Int?
     var lastTouchY : Int?
 
-    func setup(delegate: GameDelegate, board: Board, startTime: Int) {
+    func setup(delegate: GameDelegate, board: Board, startTime: Int, moves: Int) {
         self.gameDelegate = delegate
         
         self.boardView = childNode(withName: "board") as? BoardView
@@ -41,17 +41,19 @@ class SingleGameScene: SKScene, BoardObserver {
         self.timeText = childNode(withName: "time") as? SKLabelNode
         self.recordLabel = childNode(withName: "record") as? SKLabelNode
         self.recordTime = childNode(withName: "recordTime") as? SKLabelNode
-        record = LevelStorage().getRecord(board: board)
-        if record != nil {
-            recordTime?.text = timeAsString(record!)
+        let recordState = LevelStorage().getRecord(board: board)
+        if recordState != nil {
+            record = recordState!.seconds
+            recordTime?.text = timeAsString(recordState!.seconds)
         }else {
+            record = nil
             recordLabel?.isHidden = true
             recordTime?.isHidden = true
         }
         timeCounter = startTime
         displayTime()
 
-        moveCounter = 0
+        moveCounter = moves
         displayMoves()
         
         boardView?.board?.attachObserver(self)
@@ -90,7 +92,16 @@ class SingleGameScene: SKScene, BoardObserver {
     }
 
     func displayMoves() {
-        movesText?.text = "Moves: \(moveCounter)"
+        if let maxMoves = boardView!.board?.moves {
+            movesText?.text = "Moves: \(moveCounter)/\(maxMoves)"
+            if moveCounter>maxMoves {
+                movesText?.fontColor = .red
+            }else {
+                movesText?.fontColor = .white
+            }
+        }else {
+            movesText?.text = "Moves: \(moveCounter)"
+        }
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -104,9 +115,9 @@ class SingleGameScene: SKScene, BoardObserver {
             lastTouchX = Int((touchLocation.x-boardView!.position.x)/boardView!.cellSize!)
             lastTouchY = Int((boardView!.position.y-touchLocation.y)/boardView!.cellSize!)
         }else if quitButton!.contains(touchLocation) {
-            gameDelegate?.gameCompleted(board: boardView!.board!, seconds: timeCounter)
+            gameDelegate?.gameCompleted(board: boardView!.board!, seconds: timeCounter, moves: moveCounter)
         }else if restartButton!.contains(touchLocation) {
-            boardView?.board?.initializeFromString(boardString: boardView!.board!.originalBoardString)
+            boardView?.board?.reset()
             moveCounter = 0
             displayMoves()
         }
@@ -168,13 +179,15 @@ class SingleGameScene: SKScene, BoardObserver {
                 let cellY = Int((boardView!.position.y-position.y)/boardView!.cellSize!)
                 boardView?.board?.moveCar(car: car, x: cellX-selectedOffsetX, y: cellY-selectedOffsetY)
                 if boardView!.board!.isExitPosition(car: car) {
+                    let completionMoves = moveCounter + 1
+                    displayMoves()
                     selectedCar = nil
                     car.selected = false
                     let carView = boardView?.viewForCar(car: car)
                     carView?.run(SKAction.sequence([
                         SKAction.move(by: CGVector(dx: boardView!.cellSize!*3, dy: 0.0), duration: 0.5),
                         SKAction.run( {
-                            self.gameDelegate?.gameCompleted(board: self.boardView!.board!, seconds: self.timeCounter)
+                            self.gameDelegate?.gameCompleted(board: self.boardView!.board!, seconds: self.timeCounter, moves: completionMoves)
                         })])
                     )
                 }

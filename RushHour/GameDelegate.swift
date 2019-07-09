@@ -7,11 +7,11 @@
 //
 
 protocol GameDelegate {
-    func gameCompleted(board: Board, seconds: Int)
+    func gameCompleted(board: Board, seconds: Int, moves: Int)
     func finishedGame()
     func selectedDifficulty(difficulty: Difficulty)
     func selectedCompletedLevels()
     func selectedInProgressLevels()
     func selectedRandomLevels()
-    func selectedLevel(board: Board, startTime: Int)
+    func selectedLevel(board: Board, startTime: Int, moves: Int)
 }
