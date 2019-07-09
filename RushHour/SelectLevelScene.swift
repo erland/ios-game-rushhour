@@ -14,6 +14,7 @@ class SelectLevelScene: SKScene {
     var boards : [BoardView] = []
     var boardTexts : [SKLabelNode] = []
     var timeTexts : [SKLabelNode] = []
+    var minMoves : [SKLabelNode] = []
     var times : [Int] = []
     var moves: [Int] = []
     var loadingText : SKLabelNode?
@@ -54,6 +55,11 @@ class SelectLevelScene: SKScene {
                 timeText.isHidden = true
                 timeTexts.append(timeText)
             }
+            let minMoves = childNode(withName:"minMoves\(i)") as? SKLabelNode
+            if let minMoves = minMoves {
+                minMoves.isHidden = true
+                self.minMoves.append(minMoves)
+            }
             times.append(0)
             moves.append(0)
         }
@@ -66,6 +72,7 @@ class SelectLevelScene: SKScene {
             boards[i].isHidden = true
             boardTexts[i].isHidden = true
             timeTexts[i].isHidden = true
+            minMoves[i].isHidden = true
             times[i] = 0
             moves[i] = 0
         }
@@ -85,6 +92,9 @@ class SelectLevelScene: SKScene {
                         }
                         DispatchQueue.main.async {
                             let board = storage.initializeBoard(storedBoard)
+                            if record != nil && board.moves != nil && record!.moves <= board.moves! {
+                                self.minMoves[i-1].isHidden = false
+                            }
                             self.boards[i-1].setup(board: board)
                             self.boards[i-1].alpha = 0.3
                             self.boards[i-1].isHidden = false
@@ -121,8 +131,12 @@ class SelectLevelScene: SKScene {
                 for i in 1...12 {
                     if storedBoards.count>(offset+i-1) {
                         let storedBoard = storedBoards[offset+i-1]
+                        let record = storage.getRecord(boardNumbers: storedBoard.original)
                         DispatchQueue.main.async {
                             let board = storage.initializeBoard(storedBoard)
+                            if record != nil && board.moves != nil && record!.moves <= board.moves! {
+                                self.minMoves[i-1].isHidden = false
+                            }
                             self.boards[i-1].setup(board: board)
                             self.boards[i-1].alpha = 0.3
                             self.boards[i-1].isHidden = false
@@ -162,21 +176,24 @@ class SelectLevelScene: SKScene {
                     for i in 1...12 {
                         let boardNumbers = repository.getLevel(difficulty: difficulty, level: offset+i)
                         if boardNumbers != nil {
+                            let record = storage.getRecord(boardNumbers: boardNumbers!)
                             let inProgress = storage.getInProgress(boardNumbers: boardNumbers!)
                             if inProgress != nil {
                                 self.times[i-1] = inProgress!.seconds
                                 self.moves[i-1] = inProgress!.moves
                             }else {
-                                let record = storage.getRecord(boardNumbers: boardNumbers!)
                                 if record != nil {
                                     self.times[i-1] = record!.seconds
                                     self.moves[i-1] = record!.moves
                                 }
                             }
                             DispatchQueue.main.async {
-                                let board = Board.init(name: "\(self.difficultyAsString(difficulty)) \(i)", boardString: boardNumbers!)
+                                let board = Board.init(name: "\(self.difficultyAsString(difficulty)) \(i+offset)", boardString: boardNumbers!)
                                 if inProgress != nil && inProgress!.current.count>0 {
                                     board.initializeFromString(boardString: inProgress!.current)
+                                }
+                                if record != nil && board.moves != nil && record!.moves <= board.moves! {
+                                    self.minMoves[i-1].isHidden = false
                                 }
                                 self.boards[i-1].setup(board: board)
                                 self.boards[i-1].alpha = 0.3
