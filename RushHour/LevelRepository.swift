@@ -386,17 +386,4 @@ class LevelRepository {
         }
         return nil
     }
-    
-    func calculateDifficulty(boardNumbers: String) -> Difficulty {
-        return .Easy
-    }
-    
-    func getGeneratedLevel() -> String? {
-        return nil
-    }
-    
-
-    func getGeneratedLevel(difficulty: Difficulty) -> String? {
-        return nil
-    }
 }

@@ -14,7 +14,6 @@ class SelectDifficultyScene: SKScene {
     var mediumButton: SKLabelNode?
     var hardButton: SKLabelNode?
     var veryHardButton: SKLabelNode?
-    var randomButton: SKLabelNode?
     var completedButton: SKLabelNode?
     var inProgressButton: SKLabelNode?
 
@@ -25,7 +24,6 @@ class SelectDifficultyScene: SKScene {
         self.mediumButton = childNode(withName:"medium") as? SKLabelNode
         self.hardButton = childNode(withName:"hard") as? SKLabelNode
         self.veryHardButton = childNode(withName:"veryHard") as? SKLabelNode
-        self.randomButton = childNode(withName:"random") as? SKLabelNode
         self.completedButton = childNode(withName:"completed") as? SKLabelNode
         self.inProgressButton = childNode(withName:"inProgress") as? SKLabelNode
     }
@@ -47,8 +45,6 @@ class SelectDifficultyScene: SKScene {
             gameDelegate?.selectedDifficulty(difficulty: Difficulty.Hard)
         }else if veryHardButton!.contains(touchLocation) {
             gameDelegate?.selectedDifficulty(difficulty: Difficulty.VeryHard)
-        }else if randomButton!.contains(touchLocation) {
-            gameDelegate?.selectedRandomLevels()
         }else if completedButton!.contains(touchLocation) {
             gameDelegate?.selectedCompletedLevels()
         }else if inProgressButton!.contains(touchLocation) {

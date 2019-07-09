@@ -214,44 +214,6 @@ class SelectLevelScene: SKScene {
                         }
                         self.loadingText?.isHidden = true
                     }
-                }else {
-                    for i in 1...12 {
-                        let boardNumbers = repository.getGeneratedLevel()
-                        if boardNumbers != nil {
-                            let record = storage.getRecord(boardNumbers: boardNumbers!)
-                            if record != nil {
-                                self.times[i-1] = record!.seconds
-                            }
-                            let difficulty = repository.calculateDifficulty(boardNumbers: boardNumbers!)
-                            DispatchQueue.main.async {
-                                let board = Board.init(name: "Random \(self.difficultyAsString(difficulty))", boardString: boardNumbers!)
-                                self.boards[i-1].setup(board: board)
-                                self.boards[i-1].alpha = 0.3
-                                self.boards[i-1].isHidden = false
-                                self.boardTexts[i-1].text = "\(self.difficultyAsString(difficulty))"
-                                self.boardTexts[i-1].alpha = 0.3
-                                self.boardTexts[i-1].isHidden = false
-                                if self.times[i-1] > 0 {
-                                    self.timeTexts[i-1].text = "\(self.timeAsString(self.times[i-1]))"
-                                    self.timeTexts[i-1].isHidden = false
-                                    self.timeTexts[i-1].alpha = 0.3
-                                }
-                            }
-                        }
-                    }
-                    DispatchQueue.main.async {
-                        self.nextButton?.isHidden = false
-                        for i in 0..<12 {
-                            if self.boards[i].alpha > 0.1 {
-                                self.boards[i].alpha = 1.0
-                                self.boardTexts[i].alpha = 1.0
-                                if self.times[i]>0 {
-                                    self.timeTexts[i].alpha = 1.0
-                                }
-                            }
-                        }
-                        self.loadingText?.isHidden = true
-                    }
                 }
             }
         })
