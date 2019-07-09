@@ -171,7 +171,7 @@ class SelectLevelScene: SKScene {
                                 self.boards[i-1].setup(board: board)
                                 self.boards[i-1].alpha = 0.3
                                 self.boards[i-1].isHidden = false
-                                self.boardTexts[i-1].text = "\(self.difficultyAsString(difficulty)) \(i)"
+                                self.boardTexts[i-1].text = "\(self.difficultyAsString(difficulty)) \(i+offset)"
                                 self.boardTexts[i-1].alpha = 0.3
                                 self.boardTexts[i-1].isHidden = false
                                 if self.times[i-1] > 0 {

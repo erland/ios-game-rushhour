@@ -15,6 +15,7 @@ class BoardView : SKSpriteNode, BoardObserver {
     var scale: CGFloat?
     
     func setup(board: Board) {
+        removeAllChildren()
         self.cellSize = size.width/CGFloat(board.width)
         print("\(size.width) with \(board.width) gives cellSize=\(cellSize!)")
         self.board = board
