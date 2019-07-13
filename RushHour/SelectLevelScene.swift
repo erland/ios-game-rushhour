@@ -27,13 +27,13 @@ class SelectLevelScene: SKScene {
     enum LevelType {
         case Completed
         case InProgress
-        case Generated
         case Predefined
     }
-    func setup(delegate: GameDelegate, difficulty: Difficulty?, type: LevelType) {
+    func setup(delegate: GameDelegate, difficulty: Difficulty?, type: LevelType, offset: Int) {
         self.gameDelegate = delegate
         self.difficulty = difficulty
         self.levelType = type
+        self.offset = offset
         
         loadingText = childNode(withName:"loading") as? SKLabelNode
         backButton = childNode(withName:"back") as? SKLabelNode
@@ -63,7 +63,7 @@ class SelectLevelScene: SKScene {
             times.append(0)
             moves.append(0)
         }
-        fillContent(withOffset: 0)
+        fillContent(withOffset: offset)
     }
     
     func fillContent(withOffset offset: Int) {
@@ -271,8 +271,8 @@ class SelectLevelScene: SKScene {
         let touchLocation = touch.location(in: self)
         
         if backButton!.contains(touchLocation) {
-            if offset == 0 || levelType == .Generated {
-                gameDelegate?.finishedGame()
+            if offset == 0 {
+                gameDelegate?.restartGame()
             }else {
                 fillContent(withOffset: offset-12)
             }
@@ -283,9 +283,9 @@ class SelectLevelScene: SKScene {
                 if boards[i].contains(touchLocation) {
                     if boards[i].board != nil {
                         if timeTexts[i].text == nil || !timeTexts[i].text!.hasSuffix("...") {
-                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: 0, moves: 0)
+                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: 0, moves: 0, offset: offset)
                         }else {
-                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: times[i], moves: moves[i])
+                            gameDelegate?.selectedLevel(board: boards[i].board!, startTime: times[i], moves: moves[i], offset: offset)
                         }
                         break
                     }

@@ -12,12 +12,18 @@ import GameplayKit
 
 class GameViewController: UIViewController, GameDelegate {
     var board : Board?
+    var levelType : SelectLevelScene.LevelType?
+    var offset : Int = 0
+    var difficulty : Difficulty?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         if let view = self.view as! SKView? {
             view.ignoresSiblingOrder = true
         }
+        offset = 0
+        difficulty = nil
+        levelType = nil
 
         selectDifficulty()
     }
@@ -59,7 +65,7 @@ class GameViewController: UIViewController, GameDelegate {
             LevelStorage().storeBoardInProgress(board: board, seconds: seconds, moves: moves, hints: 0)
         }
         if !completed {
-            finishedGame()
+            backToMenu()
         }else {
             if let view = self.view as! SKView? {
                 // Load the SKScene from 'GameScene.sks'
@@ -77,14 +83,34 @@ class GameViewController: UIViewController, GameDelegate {
             }
         }
     }
-    func finishedGame() {
+    func backToMenu() {
+        if offset > 0 && levelType != nil {
+            switch levelType! {
+            case .Predefined:
+                selectedDifficulty(difficulty: difficulty!)
+            case .Completed:
+                viewDidLoad()
+            case .InProgress:
+                viewDidLoad()
+            }
+        }else {
+            viewDidLoad()
+        }
+    }
+    
+    func restartGame() {
         viewDidLoad()
     }
     func selectedDifficulty(difficulty: Difficulty) {
+        self.difficulty = difficulty
+        if levelType != SelectLevelScene.LevelType.Predefined {
+            self.levelType = SelectLevelScene.LevelType.Predefined
+            offset = 0
+        }
         if let view = self.view as! SKView? {
             // Load the SKScene from 'GameScene.sks'
             if let scene = SKScene(fileNamed: "SelectLevelScene") as? SelectLevelScene {
-                scene.setup(delegate: self, difficulty: difficulty, type: .Predefined)
+                scene.setup(delegate: self, difficulty: difficulty, type: .Predefined, offset: offset)
                 // Set the scale mode to scale to fit the window
                 scene.scaleMode = .aspectFit
                 view.presentScene(scene)
@@ -93,10 +119,15 @@ class GameViewController: UIViewController, GameDelegate {
     }
     
     func selectedCompletedLevels() {
+        if levelType != SelectLevelScene.LevelType.Completed {
+            self.levelType = SelectLevelScene.LevelType.Completed
+            difficulty = nil
+            offset = 0
+        }
         if let view = self.view as! SKView? {
             // Load the SKScene from 'GameScene.sks'
             if let scene = SKScene(fileNamed: "SelectLevelScene") as? SelectLevelScene {
-                scene.setup(delegate: self, difficulty: nil, type: .Completed)
+                scene.setup(delegate: self, difficulty: nil, type: .Completed, offset: offset)
                 // Set the scale mode to scale to fit the window
                 scene.scaleMode = .aspectFit
                 view.presentScene(scene)
@@ -106,10 +137,15 @@ class GameViewController: UIViewController, GameDelegate {
     }
     
     func selectedInProgressLevels() {
+        if levelType != SelectLevelScene.LevelType.InProgress {
+            self.levelType = SelectLevelScene.LevelType.InProgress
+            difficulty = nil
+            offset = 0
+        }
         if let view = self.view as! SKView? {
             // Load the SKScene from 'GameScene.sks'
             if let scene = SKScene(fileNamed: "SelectLevelScene") as? SelectLevelScene {
-                scene.setup(delegate: self, difficulty: nil, type: .InProgress)
+                scene.setup(delegate: self, difficulty: nil, type: .InProgress, offset: offset)
                 // Set the scale mode to scale to fit the window
                 scene.scaleMode = .aspectFit
                 view.presentScene(scene)
@@ -118,20 +154,8 @@ class GameViewController: UIViewController, GameDelegate {
 
     }
     
-    func selectedRandomLevels() {
-        if let view = self.view as! SKView? {
-            // Load the SKScene from 'GameScene.sks'
-            if let scene = SKScene(fileNamed: "SelectLevelScene") as? SelectLevelScene {
-                scene.setup(delegate: self, difficulty: nil, type: .Generated)
-                // Set the scale mode to scale to fit the window
-                scene.scaleMode = .aspectFit
-                view.presentScene(scene)
-            }
-        }
-
-    }
-    
-    func selectedLevel(board: Board, startTime: Int, moves: Int) {
+    func selectedLevel(board: Board, startTime: Int, moves: Int, offset: Int) {
+        self.offset = offset
         if let view = self.view as! SKView? {
             // Load the SKScene from 'GameScene.sks'
             if let scene = SKScene(fileNamed: "SingleGameScene") as? SingleGameScene {

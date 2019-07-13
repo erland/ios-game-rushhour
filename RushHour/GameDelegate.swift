@@ -8,10 +8,10 @@
 
 protocol GameDelegate {
     func gameCompleted(board: Board, seconds: Int, moves: Int)
-    func finishedGame()
+    func restartGame()
+    func backToMenu()
     func selectedDifficulty(difficulty: Difficulty)
     func selectedCompletedLevels()
     func selectedInProgressLevels()
-    func selectedRandomLevels()
-    func selectedLevel(board: Board, startTime: Int, moves: Int)
+    func selectedLevel(board: Board, startTime: Int, moves: Int, offset: Int)
 }

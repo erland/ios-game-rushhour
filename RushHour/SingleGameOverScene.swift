@@ -62,7 +62,7 @@ class SingleGameOverScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         // We need to ensure the sceen is shown for 2 seconds before we allow player to continue
         if openedTime!<NSDate().timeIntervalSince1970-2 {
-            gameDelegate?.finishedGame()
+            gameDelegate?.backToMenu()
         }
     }
 }
