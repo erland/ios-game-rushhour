@@ -18,6 +18,10 @@ class SingleGameOverScene: SKScene {
     var movesText: SKLabelNode?
     var boardName: SKLabelNode?
     
+    override func sceneDidLoad() {
+        localize()
+    }
+    
     func setup(delegate: GameDelegate, board: Board, seconds: Int, moves: Int) {
         self.gameDelegate = delegate
         
@@ -34,22 +38,22 @@ class SingleGameOverScene: SKScene {
                     carView.isHidden = true
                 }
             }
-            status?.text = "Congratulations!"
+            status?.text = "\(NSLocalizedString("congratulations", comment: "congratulations"))!"
             let hours = Int(seconds/3600)
             let minutes = String(format: "%02d",Int((seconds%3600)/60))
             let seconds = String(format: "%02d",Int(seconds%60))
             if hours == 0 {
-                completedIn?.text = "Completed in: \(minutes):\(seconds)"
+                completedIn?.text = "\(NSLocalizedString("completedIn", comment: "completedIn")): \(minutes):\(seconds)"
             }else {
-                completedIn?.text = "Completed in: \(hours):\(minutes):\(seconds)"
+                completedIn?.text = "\(NSLocalizedString("completedIn", comment: "completedIn")): \(hours):\(minutes):\(seconds)"
             }
             if let maxMoves = boardView!.board?.moves {
-                movesText?.text = "Moves: \(moves)/\(maxMoves)"
+                movesText?.text = "\(NSLocalizedString("moves", comment: "moves")): \(moves)/\(maxMoves)"
             }else {
-                movesText?.text = "Moves: \(moves)"
+                movesText?.text = "\(NSLocalizedString("moves", comment: "moves")): \(moves)"
             }
         }else {
-            status?.text = "Not completed"
+            status?.text = "\(NSLocalizedString("notCompleted", comment: "notCompleted"))"
             completedIn?.text = ""
             movesText?.text = ""
         }

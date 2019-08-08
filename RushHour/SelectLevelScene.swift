@@ -29,6 +29,11 @@ class SelectLevelScene: SKScene {
         case InProgress
         case Predefined
     }
+
+    override func sceneDidLoad() {
+        localize()
+    }
+
     func setup(delegate: GameDelegate, difficulty: Difficulty?, type: LevelType, offset: Int) {
         self.gameDelegate = delegate
         self.difficulty = difficulty
@@ -251,13 +256,13 @@ class SelectLevelScene: SKScene {
     func difficultyAsString(_ difficulty: Difficulty) -> String {
         switch difficulty {
         case .Easy:
-            return "Easy"
+            return "\(NSLocalizedString("easy", comment: "easy"))"
         case .Medium:
-            return "Medium"
+            return "\(NSLocalizedString("medium", comment: "medium"))"
         case .Hard:
-            return "Hard"
+            return "\(NSLocalizedString("hard", comment: "hard"))"
         case .VeryHard:
-            return "Very hard"
+            return "\(NSLocalizedString("veryHard", comment: "veryHard"))"
         }
     }
     

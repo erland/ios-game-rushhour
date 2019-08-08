@@ -17,6 +17,10 @@ class SelectDifficultyScene: SKScene {
     var completedButton: SKLabelNode?
     var inProgressButton: SKLabelNode?
 
+    override func sceneDidLoad() {
+        localize()
+    }
+
     func setup(delegate: GameDelegate) {
         self.gameDelegate = delegate
         
