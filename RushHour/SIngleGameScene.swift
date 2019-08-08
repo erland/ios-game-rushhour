@@ -27,6 +27,10 @@ class SingleGameScene: SKScene, BoardObserver {
     var lastTouchX : Int?
     var lastTouchY : Int?
 
+    override func sceneDidLoad() {
+        localize()
+    }
+    
     func setup(delegate: GameDelegate, board: Board, startTime: Int, moves: Int) {
         self.gameDelegate = delegate
         
@@ -93,14 +97,14 @@ class SingleGameScene: SKScene, BoardObserver {
 
     func displayMoves() {
         if let maxMoves = boardView!.board?.moves {
-            movesText?.text = "Moves: \(moveCounter)/\(maxMoves)"
+            movesText?.text = "\(NSLocalizedString("moves", comment: "moves")): \(moveCounter)/\(maxMoves)"
             if moveCounter>maxMoves {
                 movesText?.fontColor = .red
             }else {
                 movesText?.fontColor = .white
             }
         }else {
-            movesText?.text = "Moves: \(moveCounter)"
+            movesText?.text = "\(NSLocalizedString("moves", comment: "moves")): \(moveCounter)"
         }
     }
 
